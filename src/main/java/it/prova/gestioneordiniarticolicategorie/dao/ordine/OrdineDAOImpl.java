@@ -7,13 +7,13 @@ import javax.persistence.TypedQuery;
 
 import it.prova.gestioneordiniarticolicategorie.model.Ordine;
 
-public class OrdineDAOImpl implements OrdineDAO{
-	
+public class OrdineDAOImpl implements OrdineDAO {
+
 	private EntityManager entityManager;
 
 	@Override
 	public List<Ordine> list() throws Exception {
-		return (List<Ordine>) entityManager.createQuery("from Ordine",Ordine.class).getResultList();
+		return (List<Ordine>) entityManager.createQuery("from Ordine", Ordine.class).getResultList();
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class OrdineDAOImpl implements OrdineDAO{
 			throw new Exception("Problema valore in input");
 		}
 		ordineInstance = entityManager.merge(ordineInstance);
-		
+
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class OrdineDAOImpl implements OrdineDAO{
 			throw new Exception("Problema valore in input");
 		}
 		entityManager.persist(ordineInstance);
-		
+
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class OrdineDAOImpl implements OrdineDAO{
 	@Override
 	public void setEntityManager(EntityManager entityManager) {
 		this.entityManager = entityManager;
-		
+
 	}
 
 	@Override
@@ -61,6 +61,10 @@ public class OrdineDAOImpl implements OrdineDAO{
 		return query.getResultList().stream().findFirst().orElse(null);
 	}
 
-	
+	@Override
+	public Ordine getEager(Long id) {
+		return entityManager.createQuery("from Ordine o left join fetch o.articoli where o.id = ?1", Ordine.class)
+				.setParameter(1, id).getResultStream().findFirst().orElse(null);
+	}
 
 }

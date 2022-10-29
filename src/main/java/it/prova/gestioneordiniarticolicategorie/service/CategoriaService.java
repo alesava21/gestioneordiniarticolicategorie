@@ -18,9 +18,11 @@ public interface CategoriaService {
 
 	public void inserisciNuovo(Categoria categoriaInstance) throws Exception;
 
-	public Categoria caricaSingoloElementoEagerArticoli(Long id) throws Exception;
+	public Categoria caricaSingoloElementoEagerCategoria(Long id) throws Exception;
 	
 	public void aggiungiArticolo(Categoria categoriaInstance, Articolo articoloInstance) throws Exception;
-
+	
+	public void rimuoviTutteLeCategorieDallaTabellaDiJoin() throws Exception;
+	
 	public void setCategoriaDAO(CategoriaDAO categoriaDAO);
 }

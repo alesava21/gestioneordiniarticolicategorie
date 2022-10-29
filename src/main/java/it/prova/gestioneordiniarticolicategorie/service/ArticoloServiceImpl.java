@@ -7,9 +7,10 @@ import javax.persistence.EntityManager;
 import it.prova.gestioneordiniarticolicategorie.dao.EntityManagerUtil;
 import it.prova.gestioneordiniarticolicategorie.dao.articolo.ArticoloDAO;
 import it.prova.gestioneordiniarticolicategorie.model.Articolo;
+import it.prova.gestioneordiniarticolicategorie.model.Categoria;
 
-public class ArticoloServiceImpl implements ArticoloService{
-	
+public class ArticoloServiceImpl implements ArticoloService {
+
 	private ArticoloDAO articoloDAO;
 
 	@Override
@@ -64,7 +65,7 @@ public class ArticoloServiceImpl implements ArticoloService{
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
-		
+
 	}
 
 	@Override
@@ -86,7 +87,7 @@ public class ArticoloServiceImpl implements ArticoloService{
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
-		
+
 	}
 
 	@Override
@@ -108,34 +109,78 @@ public class ArticoloServiceImpl implements ArticoloService{
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
+
+	}
+
+	@Override
+	public void setArticoloDAO(ArticoloDAO articoloDAO) {
+		this.articoloDAO = articoloDAO;
+
+	}
+
+	@Override
+	public Articolo caricaSingoloElementoEagerArticolo(Long id) throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			entityManager.getTransaction().begin();
+
+			articoloDAO.setEntityManager(entityManager);
+
+			return articoloDAO.findByIdFetchingCategorie(id);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public void aggiungiCategoria(Articolo articoloInstance, Categoria categoriaInstance) throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			entityManager.getTransaction().begin();
+
+			articoloDAO.setEntityManager(entityManager);
+
+			articoloInstance = entityManager.merge(articoloInstance);
+			categoriaInstance = entityManager.merge(categoriaInstance);
+
+			articoloInstance.getCategorie().add(categoriaInstance);
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
 		
 	}
 
 	@Override
-	public Articolo caricaSingoloElementoEagerOrdine(Long id) throws Exception {
-EntityManager entityManager = EntityManagerUtil.getEntityManager();
+	public void rimuoviTutteLeCategorieDallaTabellaDiJoin() throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
 		
 		try {
 			entityManager.getTransaction().begin();
 			
 			articoloDAO.setEntityManager(entityManager);
 			
-			return articoloDAO.findByIdFetchingCategorie(id);
+			articoloDAO.deleteAllFromJoinTable();
 			
+			entityManager.getTransaction().commit();
 		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
 			e.printStackTrace();
 			throw e;
 		}finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
-	}
-
-	@Override
-	public void setArticoloDAO(ArticoloDAO articoloDAO) {
-		this.articoloDAO = articoloDAO;
 		
 	}
-
-	
 
 }

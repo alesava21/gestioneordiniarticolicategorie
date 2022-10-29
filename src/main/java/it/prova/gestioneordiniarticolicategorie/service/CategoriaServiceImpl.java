@@ -113,7 +113,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 	}
 
 	@Override
-	public Categoria caricaSingoloElementoEagerArticoli(Long id) throws Exception {
+	public Categoria caricaSingoloElementoEagerCategoria(Long id) throws Exception {
 		EntityManager entityManager = EntityManagerUtil.getEntityManager();
 
 		try {
@@ -159,6 +159,28 @@ public class CategoriaServiceImpl implements CategoriaService {
 		}finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
+	}
+
+	@Override
+	public void rimuoviTutteLeCategorieDallaTabellaDiJoin() throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+		
+		try {
+			entityManager.getTransaction().begin();
+			
+			categoriaDAO.setEntityManager(entityManager);
+			
+			categoriaDAO.deleteAllSFromJoinTable();
+			
+			entityManager.getTransaction().commit();
+		} catch (Exception e) {
+			entityManager.getTransaction().rollback();
+			e.printStackTrace();
+			throw e;
+		}finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+		
 	}
 
 }

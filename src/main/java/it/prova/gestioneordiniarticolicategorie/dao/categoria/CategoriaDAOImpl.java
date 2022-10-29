@@ -61,4 +61,16 @@ public class CategoriaDAOImpl implements CategoriaDAO {
 		return query.getResultList().stream().findFirst().orElse(null);
 	}
 
+	@Override
+	public void deleteAppFromJoinTable(Long idCategoria) throws Exception {
+
+	}
+
+	@Override
+	public void deleteAllSFromJoinTable() throws Exception {
+		entityManager.createNativeQuery("delete from articolo_categoria").executeUpdate();
+		
+		
+	}
+
 }

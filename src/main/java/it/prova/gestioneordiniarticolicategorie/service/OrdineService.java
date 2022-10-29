@@ -18,6 +18,8 @@ public interface OrdineService {
 	public void inserisciNuovo(Ordine ordineInstance) throws Exception;
 
 	public Ordine caricaSingoloElementoEagerArticoli(Long id) throws Exception;
+	
+	public void rimuoviArticoli(Long id)throws Exception;
 
 	public void setOrdineDAO(OrdineDAO ordineDAO);
 
