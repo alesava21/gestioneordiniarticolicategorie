@@ -85,6 +85,16 @@ public class Articolo {
 		this.dataInserimento = dataInserimento;
 	}
 
+	public Articolo(String descrizione, String numeroSeriale, Integer prezzoSingolo, Date dataInserimento,
+			Ordine ordine) {
+		super();
+		this.descrizione = descrizione;
+		this.numeroSeriale = numeroSeriale;
+		this.prezzoSingolo = prezzoSingolo;
+		this.dataInserimento = dataInserimento;
+		this.ordine = ordine;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -109,11 +119,11 @@ public class Articolo {
 		this.numeroSeriale = numeroSeriale;
 	}
 
-	public int getPrezzoSingolo() {
+	public Integer getPrezzoSingolo() {
 		return prezzoSingolo;
 	}
 
-	public void setPrezzoSingolo(int prezzoSingolo) {
+	public void setPrezzoSingolo(Integer prezzoSingolo) {
 		this.prezzoSingolo = prezzoSingolo;
 	}
 
@@ -123,6 +133,14 @@ public class Articolo {
 
 	public void setDataInserimento(Date dataInserimento) {
 		this.dataInserimento = dataInserimento;
+	}
+
+	public Ordine getOrdine() {
+		return ordine;
+	}
+
+	public void setOrdine(Ordine ordine) {
+		this.ordine = ordine;
 	}
 
 	public LocalDateTime getCreateDateTime() {

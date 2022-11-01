@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import it.prova.gestioneordiniarticolicategorie.dao.EntityManagerUtil;
+import it.prova.gestioneordiniarticolicategorie.exception.OrdineConArticoliAssociatiException;
 import it.prova.gestioneordiniarticolicategorie.model.Articolo;
 import it.prova.gestioneordiniarticolicategorie.model.Categoria;
 import it.prova.gestioneordiniarticolicategorie.model.Ordine;
@@ -45,12 +46,14 @@ public class MyTest {
 			testRimozioneOrdine(ordineService);
 
 			testRimozioneArticolo(articoloService);
-			
+
 			testRimozioneCategoria(categoriaService);
 
 			testCollegaArticoloAdCategoria(articoloService, categoriaService);
 
 			testCollegaCategoriaAdArticolo(articoloService, categoriaService);
+			
+			testRimozioneOrdineConExceptionPersonalizzato(ordineService, articoloService);
 
 			System.out.println(
 					"****************************** FINE batteria di test ********************************************");
@@ -208,10 +211,9 @@ public class MyTest {
 		articoloServiceInstance.rimuovi(nuovoArticolo.getId());
 		System.out.println(".......testRimozioneArticolo fine: PASSED.............");
 	}
-	
+
 	private static void testRimozioneCategoria(CategoriaService categoriaServiceInstance) throws Exception {
 		System.out.println(".......testRimozioneCategoria inizio.............");
-		
 
 		Categoria nuovaCategoria = new Categoria("Videogiochi", "AG6GS4");
 		categoriaServiceInstance.inserisciNuovo(nuovaCategoria);
@@ -219,7 +221,7 @@ public class MyTest {
 		if (nuovaCategoria.getId() == null) {
 			throw new RuntimeException("testInserisciNuovaCategoria fallito ");
 		}
-		
+
 		categoriaServiceInstance.rimuovi(nuovaCategoria.getId());
 		System.out.println(".......testRimozioneCategoria fine: PASSED.............");
 
@@ -294,6 +296,39 @@ public class MyTest {
 		categoriaServiceInstance.rimuoviTutteLeCategorieDallaTabellaDiJoin();
 		categoriaServiceInstance.rimuovi(nuovaCategoria.getId());
 		articoloServiceInstance.rimuovi(nuovoArticolo.getId());
+	}
+
+	private static void testRimozioneOrdineConExceptionPersonalizzato(OrdineService ordineServiceInstance,
+			ArticoloService articoloServiceInstance) throws Exception {
+
+		Date nuovaData = new SimpleDateFormat("dd/MM/yyyy").parse("27/10/2021");
+		Ordine nuovoOrdine = new Ordine("Alessandro sava", "Roma - Via Mosca 52", nuovaData);
+		ordineServiceInstance.inserisciNuovo(nuovoOrdine);
+
+		if (nuovoOrdine.getId() == null) {
+			throw new RuntimeException("testRimozioneOrdineConExceptionPersonalizzato fallito, ordine non inserito ");
+		}
+		
+		Articolo nuovoArticolo = new Articolo("I Fantastici Quattro", "GS3HST26", 40,
+				new SimpleDateFormat("dd/MM/yyyy").parse("27/10/2021"), nuovoOrdine);
+		articoloServiceInstance.inserisciNuovo(nuovoArticolo);
+		
+		if (nuovoArticolo.getId() == null) {
+			throw new RuntimeException("testRimozioneOrdineConExceptionPersonalizzato fallito, articolo non presente ");
+		}
+		
+		try {
+			if (nuovoArticolo.getOrdine().equals(nuovoOrdine)) {
+				throw new OrdineConArticoliAssociatiException(
+						"testRimozioneOrdineCustomExceptionSeArticoliPresenti FAILED");
+			}
+		} catch (OrdineConArticoliAssociatiException e) {
+			e.printStackTrace();
+			articoloServiceInstance.rimuovi(nuovoArticolo.getId());
+			ordineServiceInstance.rimuovi(nuovoOrdine.getId());
+		}
+		System.out.println(".......testRimozioneOrdineConExceptionPersonalizzato fine: PASSED.............");
+
 	}
 
 }
