@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import it.prova.gestioneordiniarticolicategorie.model.Categoria;
 import it.prova.gestioneordiniarticolicategorie.model.Ordine;
 
 public class OrdineDAOImpl implements OrdineDAO {
@@ -65,6 +66,31 @@ public class OrdineDAOImpl implements OrdineDAO {
 	public Ordine getEager(Long id) {
 		return entityManager.createQuery("from Ordine o left join fetch o.articoli where o.id = ?1", Ordine.class)
 				.setParameter(1, id).getResultStream().findFirst().orElse(null);
+	}
+
+	@Override
+	public List<Ordine> findOrdiniByCategoria(Categoria categoriaInput) {
+		TypedQuery<Ordine> query = entityManager.createQuery(
+				"select o from Ordine o inner join fetch o.articoli a inner join fetch a.categorie c where c.id = ?1",
+				Ordine.class);
+		query.setParameter(1, categoriaInput.getId());
+		return query.getResultList();
+	}
+
+	@Override
+	public Ordine findOrdinePiuRecente(Categoria categoriaInput) {
+		TypedQuery<Ordine> query = entityManager.createQuery(
+				"select o from Ordine o join o.articoli a join a.categorie c where c.id = ?1 order by o.dataSpedizone desc",
+				Ordine.class);
+		return query.setParameter(1, categoriaInput.getId()).getResultList().get(0);
+	}
+
+	@Override
+	public List<String> findAllIndirizziDiOrdiniConCheckNumeroSeriale(String numeroSerialeInput) {
+		TypedQuery<String> query = entityManager.createQuery(
+				"select o.indirizzoSpedizone FROM Ordine o join o.articoli a where a.numeroSeriale like ?1", String.class);
+		query.setParameter(1, "%" + numeroSerialeInput + "%");
+		return query.getResultList();
 	}
 
 }
