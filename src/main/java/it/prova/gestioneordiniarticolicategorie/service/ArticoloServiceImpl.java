@@ -158,29 +158,86 @@ public class ArticoloServiceImpl implements ArticoloService {
 		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
-		
+
 	}
 
 	@Override
 	public void rimuoviTutteLeCategorieDallaTabellaDiJoin() throws Exception {
 		EntityManager entityManager = EntityManagerUtil.getEntityManager();
-		
+
 		try {
 			entityManager.getTransaction().begin();
-			
+
 			articoloDAO.setEntityManager(entityManager);
-			
+
 			articoloDAO.deleteAllFromJoinTable();
-			
+
 			entityManager.getTransaction().commit();
 		} catch (Exception e) {
 			entityManager.getTransaction().rollback();
 			e.printStackTrace();
 			throw e;
-		}finally {
+		} finally {
 			EntityManagerUtil.closeEntityManager(entityManager);
 		}
-		
+
+	}
+
+	@Override
+	public int prezziDegliArticoliDellaCategoria(Categoria categoriaInstance) throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			articoloDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return articoloDAO.sumOfPricesOfCategoriasArticoli(categoriaInstance);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public int voglioLaSommaDeiPrezziDegliArticoliIndirizzati(String destinatario) throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			articoloDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return articoloDAO.sumOfPricesForTheArticoliAddressed(destinatario);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
+	}
+
+	@Override
+	public List<Articolo> articoliDiOrdineConErrori() throws Exception {
+		EntityManager entityManager = EntityManagerUtil.getEntityManager();
+
+		try {
+			// uso l'injection per il dao
+			articoloDAO.setEntityManager(entityManager);
+
+			// eseguo quello che realmente devo fare
+			return articoloDAO.findAllArticoliOfOrderWithErrors();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			EntityManagerUtil.closeEntityManager(entityManager);
+		}
 	}
 
 }

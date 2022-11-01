@@ -1,11 +1,13 @@
 package it.prova.gestioneordiniarticolicategorie.dao.categoria;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
 import it.prova.gestioneordiniarticolicategorie.model.Categoria;
+import it.prova.gestioneordiniarticolicategorie.model.Ordine;
 
 public class CategoriaDAOImpl implements CategoriaDAO {
 
@@ -62,15 +64,28 @@ public class CategoriaDAOImpl implements CategoriaDAO {
 	}
 
 	@Override
-	public void deleteAppFromJoinTable(Long idCategoria) throws Exception {
+	public void deleteAllSFromJoinTable() throws Exception {
+		entityManager.createNativeQuery("delete from articolo_categoria").executeUpdate();
 
 	}
 
 	@Override
-	public void deleteAllSFromJoinTable() throws Exception {
-		entityManager.createNativeQuery("delete from articolo_categoria").executeUpdate();
-		
-		
+	public List<Categoria> findAllArticolsCategorieOfOrdine(Ordine ordineInstance) throws Exception {
+		TypedQuery<Categoria> query = entityManager.createQuery(
+				"select distinct c FROM Categoria c inner join fetch c.articoli a inner join fetch a.ordine o where o.id = ?1",
+				Categoria.class);
+		query.setParameter(1, ordineInstance.getId());
+		return query.getResultList();
+	}
+
+	@Override
+	public List<String> findCategorisCodiciOfOrdiniByMonth(Date input) throws Exception {
+		TypedQuery<String> query = entityManager.createQuery(
+				"select distinct c.codice FROM Categoria c inner join c.articoli a inner join a.ordine o where month(o.dataScadenza) = month(?1) and year(o.dataScadenza) = year(?2)",
+				String.class);
+		query.setParameter(1, new java.sql.Date(input.getTime()));
+		query.setParameter(2, new java.sql.Date(input.getTime()));
+		return query.getResultList();
 	}
 
 }

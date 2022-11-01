@@ -25,5 +25,14 @@ public interface ArticoloService {
 	public void rimuoviTutteLeCategorieDallaTabellaDiJoin() throws Exception;
 	
 	public void setArticoloDAO(ArticoloDAO articoloDAO);
+	
+	public int prezziDegliArticoliDellaCategoria(Categoria categoriaInstance) throws Exception;
+	
+	public int voglioLaSommaDeiPrezziDegliArticoliIndirizzati(String destinatario) throws Exception;
+	
+	public List<Articolo> articoliDiOrdineConErrori() throws Exception;
+
+
+
 
 }

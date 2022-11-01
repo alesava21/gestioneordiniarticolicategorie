@@ -59,9 +59,20 @@ public class MyTest {
 			testTrovaOrdiniPerCategoriaEffettuati(categoriaService, ordineService, articoloService);
 
 			testCercaOrdiniPiuRecenti(ordineService, categoriaService, articoloService);
-			
+
 			testTrovaIndirizzoContenenteStringNumeroDiSerieArticoli(ordineService, articoloService);
+
+			testTrovaDistinctCategoriaArticoloOrdine(ordineService, articoloService, categoriaService);
+
+			testTrovaCodiciCategoriaDiOrdiniEffettuatiInUnDeterminatoMese(ordineService, articoloService,
+					categoriaService);
+
+			testSommaPrezziArticoliDellaCategoria(ordineService, articoloService, categoriaService);
+
+			testSommaPrezziIndirizzatiAdUnaPersona(ordineService, articoloService, categoriaService);
 			
+			testErrori(ordineService, articoloService, categoriaService);
+
 			System.out.println(
 					"****************************** FINE batteria di test ********************************************");
 			System.out.println(
@@ -474,7 +485,6 @@ public class MyTest {
 		if (nuovoOrdine.getId() == null)
 			throw new RuntimeException("testTrovaOrdinePiurecenteConCategoria fallito, ordine non inserito ");
 
-
 		Articolo nuoArticolo = new Articolo("Iphone 14PRO", "HDGS573HSTDD", 1500, new Date(), nuovoOrdine);
 
 		articoloServiceInstance.inserisciNuovo(nuoArticolo);
@@ -488,12 +498,225 @@ public class MyTest {
 		if (indirizziOrdiniAventiArticoliConNumeroSerialeContenenteStringa.size() != 1)
 			throw new RuntimeException(
 					"testTrovaIndirizziDiOrdiniContenentiStringaNelNumeroSerialeDegliArticoli FAILED: non e stato possibile processare la tua richiesta.");
-		
+
 		articoloServiceInstance.rimuovi(nuoArticolo.getId());
 		ordineServiceInstance.rimuovi(nuovoOrdine.getId());
-		
+
 		System.out.println(".......testTrovaIndirizzoContenenteStringNumeroDiSerieArticoli fine: PASSED.............");
 
+	}
+
+	private static void testTrovaDistinctCategoriaArticoloOrdine(OrdineService ordineServiceInstance,
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance) throws Exception {
+
+		System.out.println(".......testTrovaDistinctCategoriaArticoloOrdine inizio.............");
+
+		Date dataSpedizione = new SimpleDateFormat("dd-MM-yyyy").parse("21-06-2021");
+		Date dataScadenza = new SimpleDateFormat("dd-MM-yyyy").parse("30-06-2021");
+		Ordine nuovoOrdine = new Ordine("Alessandro Sava", "Via mosca 52", dataSpedizione, dataScadenza);
+		ordineServiceInstance.inserisciNuovo(nuovoOrdine);
+
+		if (nuovoOrdine.getId() == null)
+			throw new RuntimeException("testTrovaDistinctCategoriaArticoloOrdine fallito, ordine non inserito ");
+
+		Articolo nuovoArticolo = new Articolo("Iphone 14PRO", "HDGS573HSTDD", 1500, new Date(), nuovoOrdine);
+
+		articoloServiceInstance.inserisciNuovo(nuovoArticolo);
+
+		if (nuovoArticolo.getId() == null)
+			throw new RuntimeException("testTrovaDistinctCategoriaArticoloOrdine fallito, articolo non inserito ");
+
+		Categoria categoriaInstance = new Categoria("Elettronica", "HSGDT36SJA73");
+		categoriaServiceInstance.inserisciNuovo(categoriaInstance);
+
+		if (categoriaInstance.getId() == null)
+			throw new RuntimeException("testTrovaDistinctCategoriaArticoloOrdine fallito, categoria non inserita ");
+
+		articoloServiceInstance.aggiungiCategoria(nuovoArticolo, categoriaInstance);
+
+		List<Categoria> categorieFacentiParteDellOrdine = categoriaServiceInstance
+				.trovaDistinctCategoriaArticoliDiOrdine(nuovoOrdine);
+
+		if (categorieFacentiParteDellOrdine.size() != 1)
+			throw new RuntimeException("testTrovaDistinctCategoriaArticoloOrdine FAILED: errore nell'esecuzione ");
+
+		articoloServiceInstance.rimuoviTutteLeCategorieDallaTabellaDiJoin();
+		categoriaServiceInstance.rimuovi(categoriaInstance.getId());
+		articoloServiceInstance.rimuovi(nuovoArticolo.getId());
+		ordineServiceInstance.rimuovi(nuovoOrdine.getId());
+
+		System.out.println(".......testTrovaDistinctCategoriaArticoloOrdine fine: PASSED.............");
+
+	}
+
+	private static void testTrovaCodiciCategoriaDiOrdiniEffettuatiInUnDeterminatoMese(
+			OrdineService ordineServiceInstance, ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance) throws Exception {
+		System.out.println(".......testTrovaDistinctCategoriaArticoloOrdine inizio.............");
+
+		Date dataSpedizione = new SimpleDateFormat("dd-MM-yyyy").parse("29-05-2022");
+		Date dataScadenza = new SimpleDateFormat("dd-MM-yyyy").parse("30-05-2022");
+		Ordine nuovoOrdine = new Ordine("Alessandro Sava", "Via mosca 52", dataSpedizione, dataScadenza);
+		ordineServiceInstance.inserisciNuovo(nuovoOrdine);
+
+		if (nuovoOrdine.getId() == null)
+			throw new RuntimeException(
+					"testTrovaCodiciCategoriaDiOrdiniEffettuatiInUnDeterminatoMese fallito, ordine non inserito ");
+
+		Articolo nuovoArticolo = new Articolo("Iphone 14PRO", "HDGS573HSTDD", 1500, new Date(), nuovoOrdine);
+
+		articoloServiceInstance.inserisciNuovo(nuovoArticolo);
+
+		if (nuovoArticolo.getId() == null)
+			throw new RuntimeException(
+					"testTrovaCodiciCategoriaDiOrdiniEffettuatiInUnDeterminatoMese fallito, articolo non inserito ");
+
+		Categoria categoriaInstance = new Categoria("Elettronica", "HSGDT36SJA73");
+		categoriaServiceInstance.inserisciNuovo(categoriaInstance);
+
+		if (categoriaInstance.getId() == null)
+			throw new RuntimeException(
+					"testTrovaCodiciCategoriaDiOrdiniEffettuatiInUnDeterminatoMese fallito, categoria non inserita ");
+
+		articoloServiceInstance.aggiungiCategoria(nuovoArticolo, categoriaInstance);
+
+		Date dataPerConfronto = new SimpleDateFormat("MM-yyyy").parse("02-2022");
+		List<String> descrizioniCodiciCategorieDiOrdiniEffettuatiInMese = categoriaServiceInstance
+				.trovaCodiciDiCategorieDiOrdiniEffettuatiInUnDeterminatoMese(dataPerConfronto);
+
+		articoloServiceInstance.rimuoviTutteLeCategorieDallaTabellaDiJoin();
+		categoriaServiceInstance.rimuovi(categoriaInstance.getId());
+		articoloServiceInstance.rimuovi(nuovoArticolo.getId());
+		ordineServiceInstance.rimuovi(nuovoOrdine.getId());
+
+		System.out.println(
+				".......testTrovaCodiciCategoriaDiOrdiniEffettuatiInUnDeterminatoMese fine: PASSED.............");
+
+	}
+
+	private static void testSommaPrezziArticoliDellaCategoria(OrdineService ordineServiceInstance,
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance) throws Exception {
+
+		System.out.println(".......testSommaPrezziArticoliDellaCategoria inizio.............");
+
+		Date dataSpedizione = new SimpleDateFormat("dd-MM-yyyy").parse("29-05-2022");
+		Date dataScadenza = new SimpleDateFormat("dd-MM-yyyy").parse("30-05-2022");
+		Ordine nuovoOrdine = new Ordine("Alessandro Sava", "Via mosca 52", dataSpedizione, dataScadenza);
+		ordineServiceInstance.inserisciNuovo(nuovoOrdine);
+
+		if (nuovoOrdine.getId() == null)
+			throw new RuntimeException("testSommaPrezziArticoliDellaCategoria fallito, ordine non inserito ");
+
+		Articolo nuovoArticolo = new Articolo("Iphone 14PRO", "HDGS573HSTDD", 1500, new Date(), nuovoOrdine);
+
+		articoloServiceInstance.inserisciNuovo(nuovoArticolo);
+
+		if (nuovoArticolo.getId() == null)
+			throw new RuntimeException("testSommaPrezziArticoliDellaCategoria fallito, articolo non inserito ");
+
+		Categoria categoriaInstance = new Categoria("Elettronica", "HSGDT36SJA73");
+		categoriaServiceInstance.inserisciNuovo(categoriaInstance);
+
+		if (categoriaInstance.getId() == null)
+			throw new RuntimeException("testSommaPrezziArticoliDellaCategoria fallito, categoria non inserita ");
+
+		articoloServiceInstance.aggiungiCategoria(nuovoArticolo, categoriaInstance);
+
+		int sommaPrezziDiArticoliDiUnaDeterminataCategoria = articoloServiceInstance
+				.prezziDegliArticoliDellaCategoria(categoriaInstance);
+
+		if (sommaPrezziDiArticoliDiUnaDeterminataCategoria != (nuovoArticolo.getPrezzoSingolo()))
+			throw new RuntimeException(
+					"testSommaPrezziArticoliDellaCategoria FAILED: si e'verificato un errore durante l'esecuzione della query.");
+
+		articoloServiceInstance.rimuoviTutteLeCategorieDallaTabellaDiJoin();
+		categoriaServiceInstance.rimuovi(categoriaInstance.getId());
+		articoloServiceInstance.rimuovi(nuovoArticolo.getId());
+		ordineServiceInstance.rimuovi(nuovoOrdine.getId());
+
+		System.out.println(".......testSommaPrezziArticoliDellaCategoria fine: PASSED.............");
+
+	}
+
+	private static void testSommaPrezziIndirizzatiAdUnaPersona(OrdineService ordineServiceInstance,
+			ArticoloService articoloServiceInstance, CategoriaService categoriaServiceInstance) throws Exception {
+		System.out.println(".......testSommaPrezziIndirizzatiAdUnaPersona inizio.............");
+
+		Date dataSpedizione = new SimpleDateFormat("dd-MM-yyyy").parse("29-05-2022");
+		Date dataScadenza = new SimpleDateFormat("dd-MM-yyyy").parse("30-05-2022");
+		Ordine nuovoOrdine = new Ordine("Alessandro Sava", "Via mosca 52", dataSpedizione, dataScadenza);
+		ordineServiceInstance.inserisciNuovo(nuovoOrdine);
+
+		if (nuovoOrdine.getId() == null)
+			throw new RuntimeException("testSommaPrezziIndirizzatiAdUnaPersona fallito, ordine non inserito ");
+
+		Articolo nuovoArticolo = new Articolo("Iphone 14PRO", "HDGS573HSTDD", 1500, new Date(), nuovoOrdine);
+
+		articoloServiceInstance.inserisciNuovo(nuovoArticolo);
+
+		if (nuovoArticolo.getId() == null)
+			throw new RuntimeException("testSommaPrezziIndirizzatiAdUnaPersona fallito, articolo non inserito ");
+
+		Categoria categoriaInstance = new Categoria("Elettronica", "HSGDT36SJA73");
+		categoriaServiceInstance.inserisciNuovo(categoriaInstance);
+
+		if (categoriaInstance.getId() == null)
+			throw new RuntimeException("testSommaPrezziIndirizzatiAdUnaPersona fallito, categoria non inserita ");
+
+		articoloServiceInstance.aggiungiCategoria(nuovoArticolo, categoriaInstance);
+
+		int sommaPrezziArticoliIndirizzatiA = articoloServiceInstance
+				.voglioLaSommaDeiPrezziDegliArticoliIndirizzati("Alessandro Sava");
+
+		if (sommaPrezziArticoliIndirizzatiA == 0)
+			throw new RuntimeException("testSommaPrezziIndirizzatiAdUnaPersona FAILED: errore durante l'esecuzione.");
+
+		articoloServiceInstance.rimuoviTutteLeCategorieDallaTabellaDiJoin();
+		categoriaServiceInstance.rimuovi(categoriaInstance.getId());
+		articoloServiceInstance.rimuovi(nuovoArticolo.getId());
+		ordineServiceInstance.rimuovi(nuovoOrdine.getId());
+
+		System.out.println(".......testSommaPrezziIndirizzatiAdUnaPersona fine: PASSED.............");
+	}
+
+	private static void testErrori(OrdineService ordineServiceInstance, ArticoloService articoloServiceInstance,
+			CategoriaService categoriaServiceInstance) throws Exception {
+
+		System.out.println(".......testErrori inizio.............");
+
+		Date dataSpedizione = new SimpleDateFormat("dd-MM-yyyy").parse("30-05-2022");
+		Date dataScadenza = new SimpleDateFormat("dd-MM-yyyy").parse("1-05-2022");
+		Ordine nuovoOrdine = new Ordine("Alessandro Sava", "Via mosca 52", dataSpedizione, dataScadenza);
+		ordineServiceInstance.inserisciNuovo(nuovoOrdine);
+
+		if (nuovoOrdine.getId() == null)
+			throw new RuntimeException("testErrori fallito, ordine non inserito ");
+
+		Articolo nuovoArticolo = new Articolo("Iphone 14PRO", "HDGS573HSTDD", 1500, new Date(), nuovoOrdine);
+
+		articoloServiceInstance.inserisciNuovo(nuovoArticolo);
+
+		if (nuovoArticolo.getId() == null)
+			throw new RuntimeException("testErrori fallito, articolo non inserito ");
+
+		Categoria categoriaInstance = new Categoria("Elettronica", "HSGDT36SJA73");
+		categoriaServiceInstance.inserisciNuovo(categoriaInstance);
+
+		if (categoriaInstance.getId() == null)
+			throw new RuntimeException("testErrori fallito, categoria non inserita ");
+
+		articoloServiceInstance.aggiungiCategoria(nuovoArticolo, categoriaInstance);
+
+		List<Articolo> articoliAventiOrdineConErroreNelleDate = articoloServiceInstance.articoliDiOrdineConErrori();
+
+		if (articoliAventiOrdineConErroreNelleDate.size() != 2)
+			throw new RuntimeException("testErrori FAILED: ci sono stati dei errori con le date inserite.");
+
+		categoriaServiceInstance.rimuovi(categoriaInstance.getId());
+		articoloServiceInstance.rimuovi(nuovoArticolo.getId());
+		ordineServiceInstance.rimuovi(nuovoOrdine.getId());
+
+		System.out.println(".......testErrori fine: PASSED.............");
 
 	}
 
